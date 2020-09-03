@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-img = cv2.imread('img/all.JPG')
+img = cv2.imread('img/all.jpg')
 
 
 gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -20,7 +20,7 @@ closing = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
 
 for c in cnts:
     x,y,w,h = cv2.boundingRect(c)
-    if y>200 and w >3000:
+    if h>200 and w >1500:
         cv2.rectangle(img, (x,y), (x+w, y+h), (0, 255, 0), 35)
         box_w = int(w/5)
         cv2.rectangle(img, (x,y), (x+box_w, y+h), (0, 0, 255), 15)
