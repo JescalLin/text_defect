@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from cnocr import CnOcr
 
 cropped_img_Text = []
 
