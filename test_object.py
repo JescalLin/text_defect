@@ -37,10 +37,8 @@ def process_rgb(i,rgb):
     return rgb
 
 def process_text(i,text_rgb):
-
-    print(cv2.Laplacian(text_rgb, cv2.CV_64F).var())
-
     return text_rgb
+
 
 #img = cv2.imread('img/5.jpg')
 #num = 5
@@ -75,14 +73,8 @@ for i in range(num):
     cut_image[i] = process_rgb(i,cut_image[i])
     cv2.imshow(str(i), cv2.resize(cut_image[i],(250,350)))
 for i in range(num):
+    # process_text 偵測文字瑕疵
     cropped_img_Text[i] = process_text(i,cropped_img_Text[i])
-    """
-    gray = cv2.cvtColor(cropped_img_Text[i], cv2.COLOR_RGB2GRAY)
-    morphKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5,5))
-    grad = cv2.morphologyEx(gray, cv2.MORPH_GRADIENT, morphKernel)
-    _, bw = cv2.threshold(grad, 0.0, 255.0, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    print(cv2.countNonZero(bw))
-    """
     cv2.imshow(str(i)+"cropped_Text", cropped_img_Text[i])
     
 
