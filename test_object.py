@@ -31,22 +31,17 @@ def process_rgb(i,rgb):
         r = float(cv2.contourArea(contours[idx])/(w*h))
         if(r > 0.45 and w>55):
             cv2.rectangle(rgb, (x,y), (x+w,y+h), (0, 255, 0), 2)
-            if(i<1 and w>200 and h>16):
+            if(i<1 and w>250 and h>16):
                 cropped_img_Text.append(rgb2[y-5:y+h+5, x:w+x])
                 i = 1
         idx = hierarchy[0][idx][0]
     return rgb
 
 def process_text(i,text_rgb):
-    cropped_img_gray  = cv2.cvtColor(text_rgb, cv2.COLOR_BGR2GRAY)
-    cropped_img_gray = cv2.GaussianBlur(cropped_img_gray,(3, 3), 0)
-    ret,cropped_img_th = cv2.threshold(cropped_img_gray, 0, 255,cv2.THRESH_OTSU|cv2.THRESH_BINARY_INV)
-    (cnts, _) = cv2.findContours(cropped_img_th, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    for c in cnts:
-        (x, y, w, h) = cv2.boundingRect(c)
-        cv2.rectangle(text_rgb, (x, y), (x + w, y + h), (0, 0, 255), 1)
-    return text_rgb
 
+    print(cv2.Laplacian(text_rgb, cv2.CV_64F).var())
+
+    return text_rgb
 
 #img = cv2.imread('img/5.jpg')
 #num = 5
@@ -82,9 +77,17 @@ for i in range(num):
     cv2.imshow(str(i), cv2.resize(cut_image[i],(250,350)))
 for i in range(num):
     cropped_img_Text[i] = process_text(i,cropped_img_Text[i])
+    """
+    gray = cv2.cvtColor(cropped_img_Text[i], cv2.COLOR_RGB2GRAY)
+    morphKernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5,5))
+    grad = cv2.morphologyEx(gray, cv2.MORPH_GRADIENT, morphKernel)
+    _, bw = cv2.threshold(grad, 0.0, 255.0, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    print(cv2.countNonZero(bw))
+    """
     cv2.imshow(str(i)+"cropped_Text", cropped_img_Text[i])
+    
 
 cv2.imshow('img', cv2.resize(img,(600,400)))
-cv2.imshow('closing', cv2.resize(closing,(600,400)))
 
 cv2.waitKey(0)
+cv2.destroyAllWindows()
