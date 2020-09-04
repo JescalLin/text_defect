@@ -60,6 +60,38 @@ def process_text(i,text_rgb):
 
 
 
+def alignImages(i, im1, im2):
+    # Convert images to grayscale
+    im1Gray = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
+    im2Gray = cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY) 
+    # Detect ORB features and compute descriptors.
+    orb = cv2.ORB_create(500)
+    keypoints1, descriptors1 = orb.detectAndCompute(im1Gray, None)
+    keypoints2, descriptors2 = orb.detectAndCompute(im2Gray, None)  
+    # Match features.
+    matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
+    matches = matcher.match(descriptors1, descriptors2, None)   
+    # Sort matches by score
+    matches.sort(key=lambda x: x.distance, reverse=False)   
+    # Remove not so good matches
+    numGoodMatches = int(len(matches) * 0.15)
+    matches = matches[:numGoodMatches]  
+    # Draw top matches
+    imMatches = cv2.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
+    cv2.imwrite(str(i)+"matches.jpg", imMatches)   
+    # Extract location of good matches
+    points1 = np.zeros((len(matches), 2), dtype=np.float32)
+    points2 = np.zeros((len(matches), 2), dtype=np.float32) 
+    for i, match in enumerate(matches):
+        points1[i, :] = keypoints1[match.queryIdx].pt
+        points2[i, :] = keypoints2[match.trainIdx].pt 
+    # Find homography
+    h, mask = cv2.findHomography(points1, points2, cv2.RANSAC)  
+    # Use homography
+    height, width, channels = im2.shape
+    im1Reg = cv2.warpPerspective(im1, h, (width, height))
+    return im1Reg,imMatches
+
 
 """
 img = cv2.imread('img/5.jpg')
@@ -97,14 +129,16 @@ for i in range(num):
     cut_image[i] = process_rgb(i,cut_image[i])
     cv2.imshow(str(i), cv2.resize(cut_image[i],(250,350)))
 
-
+for i in range(num):
+    cv2.imshow("cropped_img_wb"+str(i),alignImages(i,cropped_img_Text[i],cropped_img_Text[0])[1])
+for i in range(num):
+    cropped_img_Text[i] = alignImages(i,cropped_img_Text[i],cropped_img_Text[0])[0]
 for i in range(num):
     # process_text 偵測文字瑕疵
-    h, w = cropped_img_Text[0].shape[:2]
-    cropped_img_Text[i] = process_text(i,cropped_img_Text[i])
+    #cropped_img_Text[i] = process_text(i,cropped_img_Text[i])
     cv2.imshow("cropped_img_Text"+str(i), cropped_img_Text[i])
 
-
+    
 
 
 cv2.imshow('img', cv2.resize(img,(720,320)))
